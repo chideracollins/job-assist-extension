@@ -12,6 +12,13 @@
 set -euo pipefail
 
 HERMES_HOME_DIR="${HERMES_HOME:-$HOME/.hermes}"
+
+# HERMES_HOME may point at a profile home (…/profiles/<name>) when a profile is
+# active in the shell. Walk up to the root that contains the profiles/ dir.
+if [[ ! -d "$HERMES_HOME_DIR/profiles" && "$(basename "$(dirname "$HERMES_HOME_DIR")")" == "profiles" ]]; then
+  HERMES_HOME_DIR="$(dirname "$(dirname "$HERMES_HOME_DIR")")"
+fi
+
 PROFILE="${1:-}"
 
 # Auto-detect the profile when the caller does not pass one (only if unambiguous).
