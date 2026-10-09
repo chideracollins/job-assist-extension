@@ -15,22 +15,23 @@ so you can exercise Capture → Generate → Copy → Fill against any page.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8642
-MODEL = "career-os"
+MODEL = os.environ.get("MOCK_MODEL", "hermes-agent")
 
 FAKE_DRAFT = (
-    "Tailored Resume — Senior Flutter Developer\n"
+    "Tailored Resume — Senior Software Engineer\n"
     "------------------------------------------\n"
-    "Summary: Flutter engineer with production apps shipped on iOS and Android, "
-    "plus backend API experience. (MOCK OUTPUT — install the real bridge for "
-    "drafts grounded in career_record.json.)\n\n"
-    "• Led the My Quest app from spec to store, owning architecture, state "
+    "Summary: Full-stack engineer with production apps shipped across web and "
+    "mobile, plus backend API experience. (MOCK OUTPUT — connect a real Hermes "
+    "agent for drafts grounded in your career record.)\n\n"
+    "• Led a flagship app from spec to store, owning architecture, state "
     "management, and release pipeline.\n"
-    "• Built FastAPI services with typed endpoints and test coverage.\n\n"
+    "• Built backend services with typed endpoints and automated test coverage.\n\n"
     "Gaps to address: posting asks for team leadership — not yet in the record."
 )
 

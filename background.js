@@ -6,8 +6,8 @@
 const DEFAULTS = {
   apiBaseUrl: 'http://127.0.0.1:8642/v1',
   apiKey: '',
-  model: 'career-os',
-  dossierPath: '~/Documents/Career-Dossier/career_record.json',
+  model: '', // empty = auto-detect from /v1/models
+  dossierPath: '', // optional: path to a verified career record JSON
   stream: true
 };
 

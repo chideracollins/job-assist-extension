@@ -56,17 +56,21 @@
         <select id="question-select" aria-label="Fill a captured question"></select>
       </label>
       <button id="btn-fill-selected" class="secondary-btn">Fill →</button>
+      <span class="action-sep"></span>
+      <button id="btn-pdf" class="secondary-btn" title="Save as PDF via the print dialog">PDF</button>
+      <button id="btn-md" class="secondary-btn" title="Download as Markdown">.md</button>
       <button id="btn-clear" class="link-btn">Clear</button>
     </div>
   </section>
 
   <p id="error" class="error" hidden></p>
   <p class="hint">
-    Drafts are generated from your <b>verified career record</b> (career_record.json),
-    matched against this page. Review every draft before pasting — you are responsible
-    for what you submit.
+    Drafts are generated from your <b>verified career record</b> (if configured
+    in Options), matched against this page. Review every draft before pasting —
+    you are responsible for what you submit.
   </p>
 
+  <script src="export.js"></script>
   <script src="sidepanel.js"></script>
 </body>
 </html>

@@ -20,8 +20,8 @@ async function load() {
   const stored = await chrome.storage.local.get(['apiBaseUrl', 'apiKey', 'model', 'dossierPath']);
   fields.apiBaseUrl.value = stored.apiBaseUrl || 'http://127.0.0.1:8642/v1';
   fields.apiKey.value = stored.apiKey || '';
-  fields.model.value = stored.model || 'career-os';
-  fields.dossierPath.value = stored.dossierPath || '~/Documents/Career-Dossier/career_record.json';
+  fields.model.value = stored.model || '';
+  fields.dossierPath.value = stored.dossierPath || '';
 }
 
 $('#form').addEventListener('submit', async (e) => {

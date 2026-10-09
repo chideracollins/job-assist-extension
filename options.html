@@ -48,7 +48,7 @@
 </head>
 <body>
   <h1>Job Assist — Settings</h1>
-  <p class="lead">These settings connect the extension to your local Hermes agent. Everything runs on <code>127.0.0.1</code> unless you change the URL.</p>
+  <p class="lead">These settings connect the extension to <em>your</em> local Hermes agent. Everything runs on <code>127.0.0.1</code> unless you change the URL.</p>
 
   <form id="form">
     <label for="apiBaseUrl">Hermes API base URL</label>
@@ -61,11 +61,11 @@
 
     <label for="model">Model</label>
     <input type="text" id="model" spellcheck="false" />
-    <p class="hint">Default <code>career-os</code> — your profile name as advertised by <code>GET /v1/models</code>.</p>
+    <p class="hint">Leave empty to auto-detect — Hermes advertises your profile name (e.g. <code>career-os</code>) via <code>GET /v1/models</code>.</p>
 
-    <label for="dossierPath">Career record path</label>
+    <label for="dossierPath">Career record path <em>(optional)</em></label>
     <input type="text" id="dossierPath" spellcheck="false" />
-    <p class="hint">Path to <code>career_record.json</code> (use <code>~/</code> for your home directory). The agent reads this before drafting — it never drafts from screen text alone.</p>
+    <p class="hint">Path to your verified career record JSON, e.g. <code>~/Documents/Career-Dossier/career_record.json</code>. The agent reads this before drafting. Leave empty to draft only from the conversation and the agent's memory.</p>
 
     <div class="actions">
       <button type="submit" class="primary">Save</button>

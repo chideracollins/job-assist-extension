@@ -3,7 +3,7 @@
 #
 # The Job Assist extension talks to Hermes through the OpenAI-compatible API
 # server that the gateway exposes. This script appends the required env vars
-# to a profile's .env (default: career-os) if they are not already there.
+# to a profile's .env if they are not already there.
 #
 # Usage:  ./scripts/enable_api_server.sh [profile]
 # After running it, restart Hermes (quit + relaunch the desktop app, or
@@ -11,13 +11,37 @@
 # extension's Options → API key.
 set -euo pipefail
 
-PROFILE="${1:-career-os}"
 HERMES_HOME_DIR="${HERMES_HOME:-$HOME/.hermes}"
+PROFILE="${1:-}"
+
+# Auto-detect the profile when the caller does not pass one (only if unambiguous).
+if [[ -z "$PROFILE" ]]; then
+  FOUND=()
+  if [[ -d "$HERMES_HOME_DIR/profiles" ]]; then
+    while IFS= read -r d; do
+      [[ -n "$d" ]] && FOUND+=("$d")
+    done < <(find "$HERMES_HOME_DIR/profiles" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
+  fi
+  if [[ ${#FOUND[@]} -eq 1 ]]; then
+    PROFILE="${FOUND[0]}"
+    echo "Detected profile: $PROFILE"
+  elif [[ ${#FOUND[@]} -gt 1 ]]; then
+    echo "Multiple profiles found: ${FOUND[*]}" >&2
+    echo "Usage: ./scripts/enable_api_server.sh <profile-name>" >&2
+    exit 1
+  else
+    echo "No profiles found under $HERMES_HOME_DIR/profiles — create one first:" >&2
+    echo "  hermes profile create <name>" >&2
+    exit 1
+  fi
+fi
+
 PROFILE_DIR="$HERMES_HOME_DIR/profiles/$PROFILE"
 ENV_FILE="$PROFILE_DIR/.env"
 
 if [[ ! -d "$PROFILE_DIR" ]]; then
   echo "Profile directory not found: $PROFILE_DIR" >&2
+  echo "Create it with: hermes profile create $PROFILE" >&2
   exit 1
 fi
 

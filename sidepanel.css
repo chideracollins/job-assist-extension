@@ -170,6 +170,8 @@ h1 { margin: 0; font-size: 15px; line-height: 1.2; }
 }
 .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+.action-sep { width: 1px; height: 18px; background: var(--border); }
+
 .fill-select-wrap { display: inline-flex; align-items: center; }
 .fill-select-wrap select {
   max-width: 140px;
