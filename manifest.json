@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Job Assist — Hermes Copilot",
+  "version": "0.1.0",
+  "description": "Capture the job page you're looking at and let your local Hermes agent draft a tailored resume, cover letter, and application answers grounded in your verified career record.",
+  "minimum_chrome_version": "116",
+  "permissions": ["sidePanel", "storage", "activeTab", "scripting", "clipboardWrite"],
+  "host_permissions": ["http://127.0.0.1:8642/*", "http://localhost:8642/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Job Assist — Hermes Copilot"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

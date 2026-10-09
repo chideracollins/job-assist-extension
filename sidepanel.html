@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Job Assist</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">JA</span>
+      <div>
+        <h1>Job Assist</h1>
+        <p class="subtitle">Hermes Copilot</p>
+      </div>
+    </div>
+    <button id="btn-settings" class="icon-btn" title="Settings" aria-label="Open settings">⚙</button>
+  </header>
+
+  <section class="status-row">
+    <span id="status-dot" class="dot unknown" title="Connection status"></span>
+    <span id="status-text">Checking Hermes…</span>
+    <button id="btn-ping" class="link-btn" title="Re-check connection">↻</button>
+  </section>
+
+  <section class="modes">
+    <button class="mode-btn active" data-mode="resume">Resume</button>
+    <button class="mode-btn" data-mode="cover">Cover letter</button>
+    <button class="mode-btn" data-mode="answers">Answers</button>
+    <button class="mode-btn" data-mode="freeform">Ask</button>
+  </section>
+
+  <section class="capture">
+    <button id="btn-capture" class="primary-btn">📋 Capture this page</button>
+    <p id="capture-summary" class="capture-summary" hidden></p>
+  </section>
+
+  <section id="freeform-row" class="freeform" hidden>
+    <textarea id="freeform-input" rows="3" placeholder="Tell Hermes what to do with this page (e.g. 'Summarize the requirements', 'Suggest 3 projects to close these gaps')…"></textarea>
+  </section>
+
+  <button id="btn-generate" class="primary-btn" disabled>✨ Generate</button>
+
+  <section class="output" id="output-section" hidden>
+    <div class="output-toolbar">
+      <span class="output-label">Draft</span>
+      <span id="gen-status" class="gen-status"></span>
+      <button id="btn-stop" class="link-btn" hidden>■ Stop</button>
+    </div>
+    <pre id="output" class="output-text" tabindex="0"></pre>
+    <div class="output-actions">
+      <button id="btn-copy" class="secondary-btn">Copy</button>
+      <button id="btn-fill-focused" class="secondary-btn">Fill focused field</button>
+      <label class="fill-select-wrap">
+        <span class="sr-only">Fill a captured question</span>
+        <select id="question-select" aria-label="Fill a captured question"></select>
+      </label>
+      <button id="btn-fill-selected" class="secondary-btn">Fill →</button>
+      <button id="btn-clear" class="link-btn">Clear</button>
+    </div>
+  </section>
+
+  <p id="error" class="error" hidden></p>
+  <p class="hint">
+    Drafts are generated from your <b>verified career record</b> (career_record.json),
+    matched against this page. Review every draft before pasting — you are responsible
+    for what you submit.
+  </p>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

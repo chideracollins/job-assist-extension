@@ -1,0 +1,17 @@
+# Dependencies / build output
+node_modules/
+dist/
+*.zip
+__pycache__/
+*.pyc
+
+# OS noise
+.DS_Store
+
+# Editor noise
+.idea/
+.vscode/
+
+# Secrets — never commit real API keys
+.env
+*.pem
