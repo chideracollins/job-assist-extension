@@ -71,8 +71,8 @@ multi-user/account features.
 
 ## Permissions note
 
-The extension now requires the **`tabs`** permission (replacing `activeTab`). This permission enables the side‑panel to query tab URLs and other tab properties needed for capture and fill operations.
-
-## Permissions note
-
-The extension now requires the **`tabs`** permission (instead of `activeTab`). This permission is needed for the side‑panel to retrieve the current tab’s URL and other details during capture and fill.
+`tabs` lets the side panel read tab URLs/titles (needed for capture and fill
+routing); `activeTab` is kept for the one-off host grant that powers the
+fallback content-script injection when a tab predates the extension install.
+Both are standard, low-risk MV3 permissions. Keep `manifest.json` strict JSON —
+no comments.
