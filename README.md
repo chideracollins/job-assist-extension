@@ -68,17 +68,27 @@ Enable it for your profile and get an API key:
 ```
 
 Then **restart Hermes** so the gateway picks it up (quit + relaunch the desktop
-app, or run `hermes -p <your-profile> gateway`), and verify it's listening:
+app, or run `hermes -p default gateway restart` on a multiplexed install), and
+verify it's listening:
 
 ```bash
-curl -H "Authorization: Bearer <your-api-key>" http://127.0.0.1:8642/v1/models
+curl -H "Authorization: Bearer <key>" http://127.0.0.1:8642/v1/models
 ```
 
 You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 
+> **The script handles the two install topologies for you.** Most Hermes installs
+> have one profile (named `hermes-agent`) served at the plain `/v1` URL. On a
+> multiplexed install (several profiles under one gateway), the **default profile
+> owns the shared listener at `/v1`** and every other profile is served under
+> `/p/<profile>/v1` — so `enable_api_server.sh` writes the API server settings to
+> BOTH the chosen profile's `.env` and the default profile's `.env`, reuses your
+> existing key, and verifies the connection for you.
+
 > Manual alternative: add `API_SERVER_ENABLED=true`, `API_SERVER_PORT=8642`,
-> `API_SERVER_KEY=<your-key>` to `<hermes-home>/profiles/<your-profile>/.env`, then
-> restart and verify as above.
+> `API_SERVER_KEY=<your-key>` to `<hermes-home>/profiles/<your-profile>/.env`
+> (and to `<hermes-home>/.env` on multiplexed installs — the default profile
+> owns the listener), then restart and verify as above.
 
 ### Step 3 — Load the extension into Chrome
 
@@ -95,7 +105,8 @@ You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 | --- | --- |
 | API base URL | `http://127.0.0.1:8642/v1` |
 | API key | the key printed by the script in Step 2 (also in your profile's `.env`) |
-| Model | **leave empty** — auto-detects your profile name via `GET /v1/models` |
+| Model | **leave empty** — auto-detects `GET /v1/models` |
+| Profile | **leave empty** on single-profile installs; set your profile name (e.g. `career-os`) on multiplexed installs so the extension calls `/p/<profile>/v1` — the default profile owns the plain `/v1` listener |
 | Career record path | **optional** — path to your verified career record JSON, e.g. `~/Documents/Career-Dossier/career_record.json`. The agent reads this before drafting. Leave empty to draft only from the conversation and the agent's memory. |
 
 Click **Test connection** — the status line should show **Connected**.

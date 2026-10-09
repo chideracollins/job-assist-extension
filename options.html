@@ -63,6 +63,10 @@
     <input type="text" id="model" spellcheck="false" />
     <p class="hint">Leave empty to auto-detect — Hermes advertises your profile name (e.g. <code>career-os</code>) via <code>GET /v1/models</code>.</p>
 
+    <label for="profile">Profile <em>(optional)</em></label>
+    <input type="text" id="profile" spellcheck="false" />
+    <p class="hint">Only needed on multiplexed installs (several Hermes profiles). Leave empty to use the default profile's plain <code>/v1</code>; set e.g. <code>career-os</code> to talk to that profile at <code>/p/career-os/v1</code>.</p>
+
     <label for="dossierPath">Career record path <em>(optional)</em></label>
     <input type="text" id="dossierPath" spellcheck="false" />
     <p class="hint">Path to your verified career record JSON, e.g. <code>~/Documents/Career-Dossier/career_record.json</code>. The agent reads this before drafting. Leave empty to draft only from the conversation and the agent's memory.</p>

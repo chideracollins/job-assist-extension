@@ -7,6 +7,7 @@ const DEFAULTS = {
   apiBaseUrl: 'http://127.0.0.1:8642/v1',
   apiKey: '',
   model: '', // empty = auto-detect from /v1/models
+  profile: '', // optional: named profile on multiplexed installs (/p/<profile>/v1)
   dossierPath: '', // optional: path to a verified career record JSON
   stream: true
 };

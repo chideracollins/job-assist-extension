@@ -85,13 +85,23 @@ function getModel() {
   return 'hermes-agent';
 }
 
+// Effective API base. With an explicit profile on a multiplexed install, the
+// shared listener routes named profiles under /p/<profile>/v1; leave profile
+// empty to talk to the default profile's /v1 (single-profile installs).
+function getApiBase() {
+  const base = (settings.apiBaseUrl || '').replace(/\/+$/, '');
+  const profile = (settings.profile || '').trim();
+  if (!profile) return base;
+  return base.replace(/\/v1$/, '') + `/p/${encodeURIComponent(profile)}/v1`;
+}
+
 async function ping() {
   if (!settings.apiBaseUrl) {
     setStatus('unknown', 'Not configured — open settings.');
     return;
   }
   try {
-    const res = await fetch(`${settings.apiBaseUrl}/models`, {
+    const res = await fetch(`${getApiBase()}/models`, {
       headers: settings.apiKey ? { Authorization: `Bearer ${settings.apiKey}` } : {}
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -245,7 +255,7 @@ async function generate() {
     return;
   }
   const model = getModel();
-  const url = `${settings.apiBaseUrl}/chat/completions`;
+  const url = `${getApiBase()}/chat/completions`;
   const messages = [
     { role: 'system', content: buildSystemPrompt() },
     { role: 'user', content: buildUserPrompt() }
@@ -429,6 +439,7 @@ elements.btnClear.addEventListener('click', () => {
     'apiBaseUrl',
     'apiKey',
     'model',
+    'profile',
     'dossierPath',
     'stream'
   ]);

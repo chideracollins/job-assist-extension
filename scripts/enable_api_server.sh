@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
-# Job Assist — enable the Hermes API server for a profile (idempotent).
+# Job Assist — enable the Hermes API server (idempotent, self-verifying).
 #
 # The Job Assist extension talks to Hermes through the OpenAI-compatible API
-# server that the gateway exposes. This script appends the required env vars
-# to a profile's .env if they are not already there.
+# server that the gateway exposes. On multiplexed installs the DEFAULT profile
+# owns the ONE shared HTTP listener (the api_server platform), so the required
+# env vars must live in BOTH the target profile's .env and the default
+# profile's .env. This script ensures both files carry API_SERVER_ENABLED,
+# API_SERVER_PORT, and API_SERVER_KEY (one shared key; an existing key is
+# reused so the extension's saved key stays valid), then verifies the server
+# responds and prints the model id it auto-detects.
 #
 # Usage:  ./scripts/enable_api_server.sh [profile]
-# After running it, restart Hermes (quit + relaunch the desktop app, or
-# run `hermes -p <profile> gateway`) and put the printed key in the
-# extension's Options → API key.
+# After running it: restart the gateway (hermes -p default gateway restart,
+# or relaunch the desktop app), then put the printed key in Options → API key.
 set -euo pipefail
 
 HERMES_HOME_DIR="${HERMES_HOME:-$HOME/.hermes}"
@@ -43,43 +47,87 @@ if [[ -z "$PROFILE" ]]; then
   fi
 fi
 
-PROFILE_DIR="$HERMES_HOME_DIR/profiles/$PROFILE"
-ENV_FILE="$PROFILE_DIR/.env"
-
-if [[ ! -d "$PROFILE_DIR" ]]; then
-  echo "Profile directory not found: $PROFILE_DIR" >&2
-  echo "Create it with: hermes profile create $PROFILE" >&2
-  exit 1
+if [[ "$PROFILE" == "default" ]]; then
+  ENV_FILE="$HERMES_HOME_DIR/.env"
+  DEFAULT_ENV_FILE="$ENV_FILE"
+else
+  PROFILE_DIR="$HERMES_HOME_DIR/profiles/$PROFILE"
+  if [[ ! -d "$PROFILE_DIR" ]]; then
+    echo "Profile directory not found: $PROFILE_DIR" >&2
+    echo "Create it with: hermes profile create $PROFILE" >&2
+    exit 1
+  fi
+  ENV_FILE="$PROFILE_DIR/.env"
+  DEFAULT_ENV_FILE="$HERMES_HOME_DIR/.env"
 fi
 
-if [[ ! -f "$ENV_FILE" ]]; then
-  echo "No .env found at $ENV_FILE — create it first." >&2
-  exit 1
+# Reuse an existing key if one is already set (keeps the extension's saved key
+# valid across re-runs); otherwise mint a strong one.
+API_KEY=""
+if [[ -f "$ENV_FILE" ]]; then
+  API_KEY="$(sed -n 's/^API_SERVER_KEY=//p' "$ENV_FILE" | tail -1)"
+fi
+if [[ -z "$API_KEY" && -f "$DEFAULT_ENV_FILE" ]]; then
+  API_KEY="$(sed -n 's/^API_SERVER_KEY=//p' "$DEFAULT_ENV_FILE" | tail -1)"
+fi
+if [[ -z "$API_KEY" ]]; then
+  API_KEY="$(openssl rand -hex 16 2>/dev/null || uuidgen | tr -d '-')"
 fi
 
-if grep -q '^API_SERVER_ENABLED=' "$ENV_FILE"; then
-  echo "API server is already configured in $ENV_FILE (no changes made)."
-  echo "If you need a fresh key, remove the API_SERVER_* lines and re-run."
-  exit 0
+write_managed_entries() {
+  local file="$1"
+  if [[ ! -f "$file" ]]; then
+    mkdir -p "$(dirname "$file")"
+    : > "$file"
+  fi
+  local tmp
+  tmp="$(mktemp "${file}.XXXXXX")"
+  # Strip any previous managed lines, keep everything else the user set.
+  sed '/^API_SERVER_ENABLED=/d; /^API_SERVER_PORT=/d; /^API_SERVER_KEY=/d' "$file" > "$tmp"
+  {
+    echo ""
+    echo "# Job Assist extension: local OpenAI-compatible API server (managed $(date -u +%Y-%m-%dT%H:%M:%SZ))"
+    echo "API_SERVER_ENABLED=true"
+    echo "API_SERVER_PORT=8642"
+    echo "API_SERVER_KEY=$API_KEY"
+  } >> "$tmp"
+  chmod 600 "$tmp"
+  mv "$tmp" "$file"
+}
+
+if [[ "$DEFAULT_ENV_FILE" == "$ENV_FILE" ]]; then
+  write_managed_entries "$ENV_FILE"
+  echo "Ensured API server settings in: $ENV_FILE"
+else
+  write_managed_entries "$ENV_FILE"
+  write_managed_entries "$DEFAULT_ENV_FILE"
+  echo "Ensured API server settings in: $ENV_FILE and $DEFAULT_ENV_FILE"
 fi
+echo "(default profile owns the shared listener on multiplexed installs)"
 
-API_KEY="$(openssl rand -hex 16 2>/dev/null || uuidgen | tr -d '-')"
-
-{
-  echo ""
-  echo "# Job Assist extension: local API server (added $(date -u +%Y-%m-%dT%H:%M:%SZ))"
-  echo "API_SERVER_ENABLED=true"
-  echo "API_SERVER_PORT=8642"
-  echo "API_SERVER_KEY=$API_KEY"
-} >> "$ENV_FILE"
-
-echo "Enabled the API server on port 8642 for profile '$PROFILE'."
+# Verification: the gateway may need a restart before the listener accepts
+# connections. Probe with the key; if nothing answers, print the restart hint.
 echo ""
-echo "API key — put this in the extension's Options → API key:"
-echo "  $API_KEY"
-echo ""
-echo "Next steps:"
-echo "  1. Restart Hermes so the gateway picks up the change:"
-echo "       hermes -p $PROFILE gateway        # or quit + relaunch the desktop app"
-echo "  2. Verify it is listening:"
-echo "       curl -H \"Authorization: Bearer $API_KEY\" http://127.0.0.1:8642/v1/models"
+echo "Verifying http://127.0.0.1:8642/v1/models with the key..."
+for i in 1 2 3; do
+  RESP="$(curl -s -m 2 -H "Authorization: Bearer $API_KEY" http://127.0.0.1:8642/v1/models || true)"
+  if [[ "$RESP" == *'"data"'* ]]; then
+    echo "Connected. Models: $RESP"
+    echo ""
+    echo "Done. Put this API key in the extension's Options → API key:"
+    echo "  $API_KEY"
+    exit 0
+  fi
+  if [[ -n "$RESP" ]]; then
+    echo "Server answered but /v1/models did not look as expected: $RESP" >&2
+  fi
+  [[ $i -lt 3 ]] && sleep 1
+done
+
+echo "The API server is not answering yet. Restart the gateway, then re-run this script:" >&2
+echo "  hermes -p default gateway restart    # multiplexed host (recommended)" >&2
+echo "  hermes -p $PROFILE gateway           # single-profile installs" >&2
+echo "" >&2
+echo "API key (already written to your .env files) — put it in Options → API key:" >&2
+echo "  $API_KEY" >&2
+exit 1
