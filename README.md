@@ -71,7 +71,7 @@ restart, verify.
 | API base URL | `http://127.0.0.1:8642/v1` |
 | API key | the `API_SERVER_KEY` from step 1 |
 | Model | `career-os` (your profile name as advertised by `/v1/models`) |
-| Career record path | `/Users/cc/Documents/Career-Dossier/career_record.json` |
+| Career record path | `~/Documents/Career-Dossier/career_record.json` |
 
 Click **Test connection** — you should see the advertised model.
 

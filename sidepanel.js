@@ -141,7 +141,7 @@ function buildSystemPrompt() {
     'You are the user\'s job-application copilot. You produce accurate, tailored application material.',
     '',
     'SOURCE OF TRUTH: the user\'s verified career record lives at ' +
-      (settings.dossierPath || '/Users/cc/Documents/Career-Dossier/career_record.json') +
+      (settings.dossierPath || '~/Documents/Career-Dossier/career_record.json') +
       ' (JSON). Read it with read_file before drafting anything. You may also consult other files in that Career-Dossier folder when they help.',
     '',
     'RULES:',

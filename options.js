@@ -21,7 +21,7 @@ async function load() {
   fields.apiBaseUrl.value = stored.apiBaseUrl || 'http://127.0.0.1:8642/v1';
   fields.apiKey.value = stored.apiKey || '';
   fields.model.value = stored.model || 'career-os';
-  fields.dossierPath.value = stored.dossierPath || '/Users/cc/Documents/Career-Dossier/career_record.json';
+  fields.dossierPath.value = stored.dossierPath || '~/Documents/Career-Dossier/career_record.json';
 }
 
 $('#form').addEventListener('submit', async (e) => {

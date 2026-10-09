@@ -7,7 +7,7 @@ const DEFAULTS = {
   apiBaseUrl: 'http://127.0.0.1:8642/v1',
   apiKey: '',
   model: 'career-os',
-  dossierPath: '/Users/cc/Documents/Career-Dossier/career_record.json',
+  dossierPath: '~/Documents/Career-Dossier/career_record.json',
   stream: true
 };
 
