@@ -1,0 +1,20 @@
+{
+  "name": "job-assist-extension",
+  "version": "1.0.0",
+  "description": "Capture the job page you're looking at and let **your local Hermes agent** draft a tailored resume, cover letter, and application answers — grounded in your **verified career record** (if configured), never invented from the screen.",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chideracollins/job-assist-extension.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chideracollins/job-assist-extension/issues"
+  },
+  "homepage": "https://github.com/chideracollins/job-assist-extension#readme"
+}
