@@ -68,3 +68,11 @@ tools — so the agent reads the career record before drafting.
 Full-form autofill by label matching, file uploads, application history,
 resume PDF/DOCX export, auto-submit, anti-bot bypass, cloud relay,
 multi-user/account features.
+
+## Permissions note
+
+The extension now requires the **`tabs`** permission (replacing `activeTab`). This permission enables the side‑panel to query tab URLs and other tab properties needed for capture and fill operations.
+
+## Permissions note
+
+The extension now requires the **`tabs`** permission (instead of `activeTab`). This permission is needed for the side‑panel to retrieve the current tab’s URL and other details during capture and fill.

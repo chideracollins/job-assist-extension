@@ -147,3 +147,10 @@ icons/               Generated placeholder icons
   the question in the dropdown and use **Fill →**.
 - **Draft ignores the career record** → check `dossierPath` and that
   `career_record.json` exists; the agent reads it with `read_file` during generation.
+
+---
+**Note:** The extension now requests the `tabs` permission (instead of `activeTab`) because it queries tab URLs from the side‑panel. This permission is safe and required for the capture functionality.
+
+## Permissions note
+
+The extension now requests the **`tabs`** permission (instead of `activeTab`). This is required because the side‑panel queries tab information and URLs.
