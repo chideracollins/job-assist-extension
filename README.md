@@ -60,7 +60,8 @@ cd ~/Repo/job-assist-extension
 ### Step 2 — Enable the Hermes API server (once)
 
 The extension talks to Hermes through the gateway's OpenAI-compatible API server.
-Enable it for your profile and get an API key:
+Enable it for your profile — the script writes the API key *and* the CORS
+allowlist the gateway requires (see the note below):
 
 ```bash
 ./scripts/enable_api_server.sh <your-profile>   # prints an API key
@@ -85,10 +86,23 @@ You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 > BOTH the chosen profile's `.env` and the default profile's `.env`, reuses your
 > existing key, and verifies the connection for you.
 
+> **Why a CORS allowlist?** The gateway rejects any request that carries an
+> `Origin` header it has not allowlisted, and Chrome always sends
+> `Origin: chrome-extension://<extension-id>` — so without the allowlist every
+> extension request gets `403 Forbidden` even with a correct API key. That was
+> the "Connected but not generating" bug. `enable_api_server.sh` allowlists
+> `chrome-extension://wfmbaupgoypxvwvi`. That ID is the same on every machine
+> because `manifest.json` pins a `key`. If you are updating an existing
+> unpacked install, click the **reload** arrow on the extension card in
+> `chrome://extensions` after pulling: the ID changes to the pinned one and its
+> saved settings reset once — re-enter the base URL and API key (Step 4).
+
 > Manual alternative: add `API_SERVER_ENABLED=true`, `API_SERVER_PORT=8642`,
-> `API_SERVER_KEY=<your-key>` to `<hermes-home>/profiles/<your-profile>/.env`
-> (and to `<hermes-home>/.env` on multiplexed installs — the default profile
-> owns the listener), then restart and verify as above.
+> `API_SERVER_KEY=<your-key>` and
+> `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi` to
+> `<hermes-home>/profiles/<your-profile>/.env` (and to `<hermes-home>/.env` on
+> multiplexed installs — the default profile owns the listener), then restart
+> and verify as above.
 
 ### Step 3 — Load the extension into Chrome
 
@@ -185,8 +199,8 @@ icons/               Generated placeholder icons
 ## Polish checklist (open items)
 
 - [ ] **Branded icons** — replace `scripts/make_icons.py` placeholders.
-- [ ] **CORS from a plain web page** — if you ever test from a non-extension page,
-      set `API_SERVER_CORS_ORIGINS=chrome-extension://<your-id>` in the profile `.env`.
+- [x] **Extension CORS** — v0.4: `enable_api_server.sh` allowlists the pinned
+      extension origin (`chrome-extension://wfmbaupgoypxvwvi`) in both `.env` files.
 - [ ] **Domain allowlist** — if you want the content script on specific job sites
       only, narrow `content_scripts.matches` in `manifest.json`.
 - [ ] **Autofill v2** — map drafts to fields by label similarity across the whole
@@ -198,6 +212,12 @@ icons/               Generated placeholder icons
 
 ## Troubleshooting
 
+- **403 on every request / "Connected" but generation never streams** → the
+  gateway rejects non-allowlisted `Origin` headers. Re-run
+  `./scripts/enable_api_server.sh <your-profile>` (it writes
+  `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi` into both
+  `.env` files), restart the gateway, then **reload the extension** in
+  `chrome://extensions` so its ID matches the allowlist.
 - **"Hermes not reachable"** → gateway not restarted after enabling the API
   server, or `API_SERVER_KEY` mismatch. Run the curl in Step 2.
 - **Capture fails on a tab** → Chrome blocks extensions on `chrome://`, the Web

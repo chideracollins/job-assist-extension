@@ -6,9 +6,15 @@
 # owns the ONE shared HTTP listener (the api_server platform), so the required
 # env vars must live in BOTH the target profile's .env and the default
 # profile's .env. This script ensures both files carry API_SERVER_ENABLED,
-# API_SERVER_PORT, and API_SERVER_KEY (one shared key; an existing key is
-# reused so the extension's saved key stays valid), then verifies the server
-# responds and prints the model id it auto-detects.
+# API_SERVER_PORT, API_SERVER_KEY (one shared key; an existing key is reused
+# so the extension's saved key stays valid), and API_SERVER_CORS_ORIGINS —
+# the gateway rejects ANY request carrying an Origin header that is not
+# allowlisted, and Chrome extensions always send Origin:
+# chrome-extension://<id>, so without the allowlist every extension request
+# 403s (that is the "Connected but not generating" bug). The extension's
+# manifest.json pins a "key", which makes its extension ID deterministic on
+# every machine, so one allowlisted origin works for all installs. The script
+# then verifies the server responds and prints the model id it auto-detects.
 #
 # Usage:  ./scripts/enable_api_server.sh [profile]
 # After running it: restart the gateway (hermes -p default gateway restart,
@@ -83,13 +89,16 @@ write_managed_entries() {
   local tmp
   tmp="$(mktemp "${file}.XXXXXX")"
   # Strip any previous managed lines, keep everything else the user set.
-  sed '/^API_SERVER_ENABLED=/d; /^API_SERVER_PORT=/d; /^API_SERVER_KEY=/d' "$file" > "$tmp"
+  sed '/^API_SERVER_ENABLED=/d; /^API_SERVER_PORT=/d; /^API_SERVER_KEY=/d; /^API_SERVER_CORS_ORIGINS=/d' "$file" > "$tmp"
   {
     echo ""
     echo "# Job Assist extension: local OpenAI-compatible API server (managed $(date -u +%Y-%m-%dT%H:%M:%SZ))"
     echo "API_SERVER_ENABLED=true"
     echo "API_SERVER_PORT=8642"
     echo "API_SERVER_KEY=$API_KEY"
+    echo "# The extension sends Origin: chrome-extension://<id>; the gateway 403s any"
+    echo "# request with a non-allowlisted Origin. The ID is pinned by manifest key."
+    echo "API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi"
   } >> "$tmp"
   chmod 600 "$tmp"
   mv "$tmp" "$file"

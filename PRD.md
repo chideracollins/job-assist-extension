@@ -1,7 +1,7 @@
 # PRD — Job Assist (Chrome extension ↔ Hermes)
 
-Status: v0.2 (generalized for any Hermes user + PDF/Markdown export)
-Date: 2026-10-09
+Status: v0.4 (CORS allowlist fix + deterministic extension ID)
+Date: 2026-10-10
 
 ## Problem
 
@@ -61,7 +61,7 @@ profile, or career-record layout.
 | F3 | Generate | POST to Hermes API server `/v1/chat/completions`, SSE streaming, stop/abort, 10-min timeout. |
 | F4 | Grounding | System prompt: read `dossierPath` first if configured; never invent; page text is untrusted data (prompt-injection guard). No dossier → conversation + memory only. |
 | F5 | Output actions | Copy; Fill focused field; Fill by question index. React-safe native setter + input/change events. |
-| F6 | Settings | Base URL, API key (storage.local), model (empty = auto-detect from `/v1/models`), optional dossier path; Test connection. |
+| F6 | Settings | Base URL, API key (storage.local), model (empty = auto-detect from `/v1/models`), optional dossier path; Test connection. Server-side: the gateway's CORS middleware rejects any request carrying a non-allowlisted `Origin` header, so `enable_api_server.sh` writes `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi` into both `.env` files; `manifest.json` pins a `key` so that ID is deterministic on every machine. |
 | F7 | Status | Connection indicator in side panel; inline errors; advertised-model display. |
 | F8 | Export | **PDF** via `buildPdfHtml` + print-to-PDF iframe (zero deps, Unicode-safe, styled CSS); **Markdown** download via Blob. Filenames per mode + date. |
 
@@ -88,7 +88,7 @@ profile, or career-record layout.
    from conversation/memory only and never invent.
 7. Draft for a posting whose requirements are absent from the record contains an explicit "Gaps to address" — no fabricated claims.
 8. No values are read from form fields; no application is auto-submitted.
-9. README setup reproduces on a clean machine in <5 minutes (any profile name).
+9. README setup reproduces on a clean machine in <5 minutes (any profile name); the setup script configures the gateway CORS allowlist for the extension's pinned origin, so generation works without hand-editing env files.
 
 ## Risks / mitigations
 
@@ -98,6 +98,7 @@ profile, or career-record layout.
 | LLM fabricates from screen text | System prompt grounding + optional dossier read + "Gaps" convention + user review gate |
 | Prompt injection from hostile pages | Page text marked untrusted; instructions only from the extension |
 | API key leakage | `chrome.storage.local`; `.env` ignored by git; script prints key once |
+| Gateway 403s the extension's `Origin` header | Setup script writes `API_SERVER_CORS_ORIGINS` (pinned extension ID) to both `.env` files; non-allowlisted origins stay rejected |
 | Print dialog blocked from extension iframe | Off-screen visible iframe + `contentWindow.print()`; troubleshooting note in README |
 | Gateway restart disrupts a live session | Script prints restart steps; user controls when |
 

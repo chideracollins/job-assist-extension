@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Job Assist — Hermes Copilot",
-  "version": "0.3.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvYYu9VqWqBQ8rLnkk980ZHy4J6JUudUWBLbs8dpYSmbnz2CB5RktCZz1wLizEjunROuULPpagdA0qWxvIxdFjoh1orVDzR0t8ZPODvSeZZQuqI8ixNO/idlJKLaLECo+gBQGwgHkxSfnb+o6s41x5FrhVtL8IHIiP5nJg6c5J5lTCYU47UGUtMANjlvQbUiil0dvz/OdHHK9XkAtzTfRlJXXP+tMB69zisFAVz4rOeYHgHvvtgpC2lpryAuijF8dnEaJoUcSE70ehZGdSS3ekG94csknzfg8h5wEIc6nKASDGfHX8EpH3Z/CVl+mAXyn8k0vStLV5cKNKY1Kyl5KIQIDAQAB",
+  "version": "0.4.0",
   "description": "Capture the job page you're looking at and let your local Hermes agent draft a tailored resume, cover letter, and application answers grounded in your verified career record.",
   "minimum_chrome_version": "116",
   "permissions": ["sidePanel", "storage", "tabs", "activeTab", "scripting", "clipboardWrite"],

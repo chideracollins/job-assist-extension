@@ -60,6 +60,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   if (msg.type === 'fill') {
+    // Fill operations may need to inject the content script (e.g., on a page
+    // that predates the extension). First try the payload; if it fails, inject
+    // `content.js` and retry once.
     (async () => {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab || tab.id === undefined) {
@@ -69,10 +72,22 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       try {
         const data = await chrome.tabs.sendMessage(tab.id, msg.payload);
         sendResponse({ ok: true, data });
-      } catch (err) {
-        sendResponse({ ok: false, error: String((err && err.message) || err) });
+        return;
+      } catch {
+        // Attempt to inject the script and retry.
+        try {
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['content.js']
+          });
+          const data = await chrome.tabs.sendMessage(tab.id, msg.payload);
+          sendResponse({ ok: true, data });
+        } catch (err) {
+          sendResponse({ ok: false, error: String((err && err.message) || err) });
+        }
       }
     })();
+    // Keep the message channel open for async reply.
     return true;
   }
 
