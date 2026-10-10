@@ -90,12 +90,15 @@ You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 > `Origin` header it has not allowlisted, and Chrome always sends
 > `Origin: chrome-extension://<extension-id>` — so without the allowlist every
 > extension request gets `403 Forbidden` even with a correct API key. That was
-> the "Connected but not generating" bug. `enable_api_server.sh` allowlists
-> `chrome-extension://wfmbaupgoypxvwvi`. That ID is the same on every machine
-> because `manifest.json` pins a `key`. If you are updating an existing
-> unpacked install, click the **reload** arrow on the extension card in
-> `chrome://extensions` after pulling: the ID changes to the pinned one and its
-> saved settings reset once — re-enter the base URL and API key (Step 4).
+> the "Connected but not generating" bug. `enable_api_server.sh` allowlists two
+> origins: `chrome-extension://wfmbaupgoypxvwvi` (the ID pinned by the `key`
+> field in `manifest.json`, identical on every machine/path) and
+> `chrome-extension://facoonfglfknhjgmamebhpdnejfaelji` (the path-derived ID
+> this repo gets under `~/Repo/job-assist-extension`, which existing installs
+> still use). Updating an existing install therefore needs **no extension
+> reload**. If you do reload the card in `chrome://extensions`, the extension
+> moves to the pinned ID and its saved settings reset once — re-enter the base
+> URL and API key (Step 4).
 
 > Manual alternative: add `API_SERVER_ENABLED=true`, `API_SERVER_PORT=8642`,
 > `API_SERVER_KEY=<your-key>` and
@@ -200,7 +203,7 @@ icons/               Generated placeholder icons
 
 - [ ] **Branded icons** — replace `scripts/make_icons.py` placeholders.
 - [x] **Extension CORS** — v0.4: `enable_api_server.sh` allowlists the pinned
-      extension origin (`chrome-extension://wfmbaupgoypxvwvi`) in both `.env` files.
+      extension origin plus the path-derived ID (both `.env` files).
 - [ ] **Domain allowlist** — if you want the content script on specific job sites
       only, narrow `content_scripts.matches` in `manifest.json`.
 - [ ] **Autofill v2** — map drafts to fields by label similarity across the whole
@@ -215,9 +218,8 @@ icons/               Generated placeholder icons
 - **403 on every request / "Connected" but generation never streams** → the
   gateway rejects non-allowlisted `Origin` headers. Re-run
   `./scripts/enable_api_server.sh <your-profile>` (it writes
-  `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi` into both
-  `.env` files), restart the gateway, then **reload the extension** in
-  `chrome://extensions` so its ID matches the allowlist.
+  `API_SERVER_CORS_ORIGINS` with the pinned and path-derived extension IDs
+  into both `.env` files) and restart the gateway. No extension reload needed.
 - **"Hermes not reachable"** → gateway not restarted after enabling the API
   server, or `API_SERVER_KEY` mismatch. Run the curl in Step 2.
 - **Capture fails on a tab** → Chrome blocks extensions on `chrome://`, the Web

@@ -61,7 +61,7 @@ profile, or career-record layout.
 | F3 | Generate | POST to Hermes API server `/v1/chat/completions`, SSE streaming, stop/abort, 10-min timeout. |
 | F4 | Grounding | System prompt: read `dossierPath` first if configured; never invent; page text is untrusted data (prompt-injection guard). No dossier → conversation + memory only. |
 | F5 | Output actions | Copy; Fill focused field; Fill by question index. React-safe native setter + input/change events. |
-| F6 | Settings | Base URL, API key (storage.local), model (empty = auto-detect from `/v1/models`), optional dossier path; Test connection. Server-side: the gateway's CORS middleware rejects any request carrying a non-allowlisted `Origin` header, so `enable_api_server.sh` writes `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi` into both `.env` files; `manifest.json` pins a `key` so that ID is deterministic on every machine. |
+| F6 | Settings | Base URL, API key (storage.local), model (empty = auto-detect from `/v1/models`), optional dossier path; Test connection. Server-side: the gateway's CORS middleware rejects any request carrying a non-allowlisted `Origin` header, so `enable_api_server.sh` writes `API_SERVER_CORS_ORIGINS` (pinned ID from the manifest `key` + the path-derived ID of existing installs) into both `.env` files. |
 | F7 | Status | Connection indicator in side panel; inline errors; advertised-model display. |
 | F8 | Export | **PDF** via `buildPdfHtml` + print-to-PDF iframe (zero deps, Unicode-safe, styled CSS); **Markdown** download via Blob. Filenames per mode + date. |
 
