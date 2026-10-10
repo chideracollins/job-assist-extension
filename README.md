@@ -73,7 +73,7 @@ app, or run `hermes -p default gateway restart` on a multiplexed install), and
 verify it's listening:
 
 ```bash
-curl -H "Authorization: Bearer <key>" http://127.0.0.1:8642/v1/models
+curl -H "Authorization: Bearer <key-from-script>" http://127.0.0.1:8642/v1/models
 ```
 
 You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
@@ -102,10 +102,11 @@ You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 
 > Manual alternative: add `API_SERVER_ENABLED=true`, `API_SERVER_PORT=8642`,
 > `API_SERVER_KEY=<your-key>` and
-> `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi` to
-> `<hermes-home>/profiles/<your-profile>/.env` (and to `<hermes-home>/.env` on
-> multiplexed installs — the default profile owns the listener), then restart
-> and verify as above.
+> `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi,chrome-extension://facoonfglfknhjgmamebhpdnejfaelji`
+> to `<hermes-home>/profiles/<your-profile>/.env` (and to
+> `<hermes-home>/.env` on multiplexed installs — the default profile owns the
+> listener), then restart and verify as above. Running
+> `enable_api_server.sh` is easier and does all of this for you.
 
 ### Step 3 — Load the extension into Chrome
 
