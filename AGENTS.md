@@ -27,7 +27,11 @@ scripts/
 
 The extension talks only to `http://127.0.0.1:8642/v1` (the Hermes gateway's
 OpenAI-compatible API server), which runs the full agent — memory, skills,
-tools.
+tools. The gateway rejects ANY request whose `Origin` header is not in
+`API_SERVER_CORS_ORIGINS` (Chrome extensions always send
+`Origin: chrome-extension://<id>`), so the allowlist in both `.env` files —
+written by `scripts/enable_api_server.sh` — is part of the bridge contract.
+Removing it reproduces the "Connected but not generating" bug.
 
 ## Invariants — never weaken these
 
@@ -57,6 +61,19 @@ tools.
 - `stream: true` is the default path; keep the SSE parser (`parseSSE`)
   tolerant of keepalive comments and non-JSON lines.
 
+## Versioning & release — required for every version bump
+
+- Every change to `"version"` in `manifest.json` MUST be released as a git tag
+  named exactly `v<version>` (e.g. manifest `0.5.0` → tag `v0.5.0`).
+- The release commit sequence is: commit the changes → `git tag v<version>` →
+  `git push origin main` → `git push origin v<version>`. A tag that exists only
+  locally is not a release.
+- Tag only AFTER the "Verification before declaring work done" checklist passes.
+- Bump the version for any user-visible change (bug fix, feature, doc-driven
+  behavior change); pure typo/doc touch-ups may ride on main untagged.
+- Never move or delete an already-pushed tag. If a release was cut from a
+  broken commit, fix forward with a new version bump and tag.
+
 ## Verification before declaring work done
 
 1. `node --check background.js content.js export.js sidepanel.js options.js scripts/test_export.js`
@@ -69,8 +86,12 @@ tools.
    curl -s http://127.0.0.1:8642/v1/models
    curl -s -X POST http://127.0.0.1:8642/v1/chat/completions \
      -H "Content-Type: application/json" \
+     -H "Origin: chrome-extension://wfmbaupgoypxvwvi" \
      -d '{"model":"hermes-agent","stream":true}'
    ```
+   A request WITH the extension's `Origin` header must not 403 — if it does,
+   the gateway's CORS allowlist is missing `API_SERVER_CORS_ORIGINS` (re-run
+   `enable_api_server.sh`, restart the gateway).
 6. Manual UI pass: reload the unpacked extension, then on a real job page run
    Capture → Generate → Copy, Fill focused field, and PDF/.md export. Confirm a
    draft's "Gaps to address" section appears when the posting asks for something
