@@ -101,7 +101,7 @@ write_managed_entries() {
     echo "# (works on any machine/path); second = the path-derived ID this repo gets"
     echo "# when cloned to ~/Repo/job-assist-extension (covers existing installs"
     echo "# that have not reloaded the extension yet)."
-    echo "API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi,chrome-extension://facoonfglfknhjgmamebhpdnejfaelji"
+    echo "API_SERVER_CORS_ORIGINS=chrome-extension://geoppgdfgipopjpapimonpohlbgecpha,chrome-extension://facoonfglfknhjgmamebhpdnejfaelji"
   } >> "$tmp"
   chmod 600 "$tmp"
   mv "$tmp" "$file"

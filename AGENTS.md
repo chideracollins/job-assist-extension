@@ -86,7 +86,7 @@ Removing it reproduces the "Connected but not generating" bug.
    curl -s http://127.0.0.1:8642/v1/models
    curl -s -X POST http://127.0.0.1:8642/v1/chat/completions \
      -H "Content-Type: application/json" \
-     -H "Origin: chrome-extension://wfmbaupgoypxvwvi" \
+     -H "Origin: chrome-extension://geoppgdfgipopjpapimonpohlbgecpha" \
      -d '{"model":"hermes-agent","stream":true}'
    ```
    A request WITH the extension's `Origin` header must not 403 — if it does,

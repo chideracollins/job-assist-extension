@@ -91,7 +91,7 @@ You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 > `Origin: chrome-extension://<extension-id>` — so without the allowlist every
 > extension request gets `403 Forbidden` even with a correct API key. That was
 > the "Connected but not generating" bug. `enable_api_server.sh` allowlists two
-> origins: `chrome-extension://wfmbaupgoypxvwvi` (the ID pinned by the `key`
+> origins: `chrome-extension://geoppgdfgipopjpapimonpohlbgecpha` (the ID pinned by the `key`
 > field in `manifest.json`, identical on every machine/path) and
 > `chrome-extension://facoonfglfknhjgmamebhpdnejfaelji` (the path-derived ID
 > this repo gets under `~/Repo/job-assist-extension`, which existing installs
@@ -102,7 +102,7 @@ You should see `{"object":"list","data":[{"id":"<your-profile>"}]}`.
 
 > Manual alternative: add `API_SERVER_ENABLED=true`, `API_SERVER_PORT=8642`,
 > `API_SERVER_KEY=<your-key>` and
-> `API_SERVER_CORS_ORIGINS=chrome-extension://wfmbaupgoypxvwvi,chrome-extension://facoonfglfknhjgmamebhpdnejfaelji`
+> `API_SERVER_CORS_ORIGINS=chrome-extension://geoppgdfgipopjpapimonpohlbgecpha,chrome-extension://facoonfglfknhjgmamebhpdnejfaelji`
 > to `<hermes-home>/profiles/<your-profile>/.env` (and to
 > `<hermes-home>/.env` on multiplexed installs — the default profile owns the
 > listener), then restart and verify as above. Running
