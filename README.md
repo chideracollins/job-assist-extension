@@ -24,6 +24,71 @@ Everything runs on `127.0.0.1`; the only data leaving your machine is the page
 text you send to Hermes — the same privacy envelope as talking to Hermes in
 chat. **The extension never auto-submits anything.**
 
+## Architecture — how it actually works
+
+Three layers: browser capture → local HTTP bridge → a real Hermes agent turn.
+
+**1. Capture (in the page).** `content.js` is a passive content script: it does
+nothing until the side panel messages it. On capture it extracts the page's
+visible main text (≤60k chars) plus the application form's *questions* — label,
+type, required, maxLength. It never reads field **values** (passwords, PII
+typed into the page stay on the page).
+
+**2. Prompt build (in the side panel).** `sidepanel.js` assembles two messages:
+
+- a **system prompt**: "you are the user's job-application copilot"; if a
+  career-record path is configured, it is declared the *source of truth* and
+  the agent is told to read it before drafting; if not, the agent must draft
+  only from the conversation and its memory. Page text is explicitly marked
+  **UNTRUSTED DATA** (prompt-injection guard: instructions inside a job posting
+  are ignored). Hard rule: never invent experience, employers, titles, dates,
+  skills, or metrics — if the posting demands something the record doesn't
+  support, say so ("Gaps to address").
+- a **user message**: page title + URL + captured text + the captured form
+  questions, then the task for the selected mode (Resume / Cover letter /
+  Answers / freeform Ask).
+
+**3. The bridge (HTTP, not ACP).** The side panel `POST`s an OpenAI-compatible
+`chat/completions` request to `http://127.0.0.1:8642` — the Hermes gateway's
+API server — with `stream: true` and a Bearer key. On multiplexed installs the
+Profile setting routes to `/p/<profile>/v1`. Why HTTP and not the ACP protocol
+editors use: ACP runs over stdio, and browsers cannot spawn local processes —
+a browser extension can only make network calls, so the gateway's HTTP surface
+is the right (and lowest-friction) transport. The gateway checks the Bearer
+key and the request's `Origin` header against `API_SERVER_CORS_ORIGINS`
+(Chrome always sends `Origin: chrome-extension://<id>`; unlisted origins get
+403 — this is why the setup script writes the allowlist).
+
+**4. What the Hermes agent does before answering.** The request does not hit a
+chat completion endpoint with a canned model — it starts a **real agent turn**
+for that profile. The agent runs exactly like the one you talk to in the
+Hermes app: it loads the profile's model/provider config, its persistent
+memory, its skills, its session state, and its tool set. A typical turn: read
+the system prompt → (if a career record is configured) call `read_file` on
+your `career_record.json` and any dossier files → reconcile the posting's
+must-haves against the record → possibly consult memory/skills → stream the
+draft. Tool activity reaches the side panel as `hermes.tool.progress` SSE
+frames, which is what the "Working… (read_file)" status shows. The agent can
+also use tools like `terminal` or web search if the task warrants it — it has
+the same powers you gave it in Hermes, which is why the bridge is
+localhost-only and every draft stops for your review.
+
+**5. What the agent knows vs. doesn't.**
+
+| The agent has | The agent does NOT have |
+| --- | --- |
+| The prompt payload: page text, form questions, your task | Anything on the page that wasn't sent — no form values, no passwords |
+| The profile's model/provider config and credentials | Your other tabs or browsing history |
+| Its persistent Hermes memory (target roles, preferences, history) | Any clipboard/screen content beyond the capture |
+| Skills + tools (read_file, terminal, web, …) per the profile's config | The career record *unless* `dossierPath` is configured (then it reads it on demand) |
+| The career record at `dossierPath`, read with `read_file` during the turn | Anything not derivable from the above — which is why it must say "gap" instead of inventing |
+
+**6. Back in the browser.** The response streams as SSE `delta.content` chunks
+into the output pane (Stop aborts mid-stream). Export/fill actions are all
+browser-local: Copy, Fill focused field / per-question (native value setter +
+real input/change events so React/Vue forms accept it), print-to-PDF, or a
+Markdown download — no AI credits, no server round-trip.
+
 ## What you'll use it for
 
 | Scenario | What you do | What you get |
